@@ -98,14 +98,19 @@ Spider.prototype.get = function (url, referer) {
   } 
   this.urls.push(url);
   
-  var u = urlParse(url);
-  if (!this.routers[u.host]) {
-    this.emit('log', debug, 'No routes for host: '+u.host+'. skipping.')
-    return this;
-  }
-  if (!this.routers[u.host].match(u.href.slice(u.href.indexOf(u.host)+u.host.length))) {
-    this.emit('log', debug, 'No routes for path '+u.href.slice(u.href.indexOf(u.host)+u.host.length)+'. skipping.')
-    return this;
+  try {
+    var u = urlParse(url);
+    if (!this.routers[u.host]) {
+      this.emit('log', debug, 'No routes for host: '+u.host+'. skipping.')
+      return this;
+    }
+    if (!this.routers[u.host].match(u.href.slice(u.href.indexOf(u.host)+u.host.length))) {
+      this.emit('log', debug, 'No routes for path '+u.href.slice(u.href.indexOf(u.host)+u.host.length)+'. skipping.')
+      return this;
+    }
+
+  } catch (e if e instanceof URIError) {
+    this.emit('log', debug, 'Invalid URI. skipping.')
   }
 
   if (referer) h.referer = referer;
